@@ -29,13 +29,13 @@ fn gen_num(length: u8, mut rng: StdRng) -> u32 {
     let length = length as u32;
     let min = u32::pow(10, length - 1);
     let max = u32::pow(10, length) - 1;
-    rng.gen_range(min..max)
+    rng.random_range(min..max)
 }
 
 fn gen_ascii(length: &u8, mut rng: StdRng) -> String {
     let mut result: Vec<u8> = Vec::new();
     for _ in 0..*length {
-        result.push(rng.gen_range(32..=126))
+        result.push(rng.random_range(32..=126))
     }
     String::from_utf8(result).expect("Couldn't encode char")
 }
@@ -50,7 +50,7 @@ const VALID_CHARS: [char; 62] = [
 fn gen_text(length: &u8, mut rng: StdRng) -> String {
     let mut result: Vec<char> = Vec::new();
     for _ in 0..*length {
-        let num = rng.gen_range(0..=61);
+        let num = rng.random_range(0..=61);
         result.push(VALID_CHARS[num])
     }
     let result: String = result.into_iter().collect();

@@ -1,0 +1,35 @@
+name: "Dependabot Auto-Merge"
+on:
+  pull_request:
+    types: [opened,edited,synchronize,reopened]
+
+permissions:
+  pull-requests: write
+  contents: write
+  checks: read
+
+jobs:
+  dependabot:
+    runs-on: ubuntu-latest
+    if: github.actor == 'dependabot[bot]'
+
+    steps:
+      - name: Get Status of current ref
+        id: get-status
+        uses: danieldeichfuss/get-status@v0.0.10
+        with:
+          ref: ${{ github.sha }}
+
+      - name: Dependabot metadata
+        if: ${{steps.get-status.outputs.all-checks-completed == 'true' &&  steps.get-status.outputs.all-checks-passed == 'true'}}
+        id: metadata
+        uses: dependabot/fetch-metadata@v2
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Merge PR from Dependabot
+        if: ${{steps.get-status.outputs.all-checks-completed == 'true' &&  steps.get-status.outputs.all-checks-passed == 'true'}}
+        id: merge-pr
+        uses: fastify/github-action-merge-dependabot@v3.6.4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}

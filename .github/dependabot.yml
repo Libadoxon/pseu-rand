@@ -4,19 +4,27 @@ updates:
   - package-ecosystem: "cargo"
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: "weekly"
       timezone: Etc/UTC
     labels:
       - "deps"
       - "automated"
+    groups:
+      cargo:
+        patterns:
+          - "*"
     open-pull-requests-limit: 10
 
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: "weekly"
       timezone: Etc/UTC
     labels:
       - "deps"
       - "automated"
+    groups:
+      github-actions:
+        patterns:
+          - "*"
     open-pull-requests-limit: 10

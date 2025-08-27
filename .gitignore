@@ -14,8 +14,3 @@ target/
 
 # nix build result
 result
-
-
-# Added by cargo
-
-/target
