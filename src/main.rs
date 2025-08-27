@@ -1,5 +1,5 @@
 use clap::{Parser, Subcommand};
-use rand::{rngs::StdRng, Rng, SeedableRng};
+use rand::{Rng, SeedableRng, rngs::StdRng};
 
 #[derive(Parser)]
 #[command(version, about, long_about = None)]
@@ -8,7 +8,8 @@ struct Cli {
     command: Commands,
     /// Seed to use
     seed: u64,
-    /// Length of the output in characters/digits
+    /// Length of the output in characters/digits (maximal 38)
+    #[arg(value_parser = clap::value_parser!(u8).range(0..=38))]
     length: u8,
 }
 
@@ -25,11 +26,17 @@ enum Commands {
     },
 }
 
-fn gen_num(length: u8, mut rng: StdRng) -> u32 {
+fn gen_num(length: u8, mut rng: StdRng) -> u128 {
     let length = length as u32;
-    let min = u32::pow(10, length - 1);
-    let max = u32::pow(10, length) - 1;
-    rng.random_range(min..max)
+
+    let mut result: u128 = 0;
+
+    for _ in 0..length {
+        let rng_num = rng.random_range(0..9);
+        result = result * 10 + rng_num as u128;
+    }
+
+    result
 }
 
 fn gen_ascii(length: &u8, mut rng: StdRng) -> String {
@@ -73,4 +80,45 @@ fn main() {
         Commands::Ascii {} => gen_ascii(&cli.length, rng),
     };
     print!("{}", out);
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_gen_num_1() {
+        let rng = SeedableRng::seed_from_u64(787 + 5);
+        assert_eq!(gen_num(5, rng), 84531)
+    }
+
+    #[test]
+    fn test_gen_num_2() {
+        let rng = SeedableRng::seed_from_u64(238094721521236520 + 11);
+        assert_eq!(gen_num(11, rng), 43185815040)
+    }
+
+    #[test]
+    fn test_gen_ascii_1() {
+        let rng = SeedableRng::seed_from_u64(1337 + 13);
+        assert_eq!(gen_ascii(&13, rng), "51h|dwTo,\\>|~")
+    }
+
+    #[test]
+    fn test_gen_ascii_2() {
+        let rng = SeedableRng::seed_from_u64(4721398401298347 + 2);
+        assert_eq!(gen_ascii(&2, rng), "g^")
+    }
+
+    #[test]
+    fn test_gen_text_1() {
+        let rng = SeedableRng::seed_from_u64(44 + 8);
+        assert_eq!(gen_text(&8, rng), "nmZnzCvv")
+    }
+
+    #[test]
+    fn test_gen_text_2() {
+        let rng = SeedableRng::seed_from_u64(1239214354653452417 + 21);
+        assert_eq!(gen_text(&21, rng), "PxQgiWCYclxWMOJyzBDMe")
+    }
 }
